@@ -7,11 +7,11 @@
 '''
 ##
 import numpy as np
-import matplotlib.pyplot as plt
+import figure as fig
 pi = np.pi
 
 ## Fourier分析
-def myFFT(series, dt, x_type='Frq', y_type='Amp', Nzp=None, flag_return='d'):
+def myFFT(series, dt, x_type='Frq', y_type='Amp', Nzp=None, result='d', holdon=False):
     ''' 使用说明
         Input
         ------
@@ -35,12 +35,15 @@ def myFFT(series, dt, x_type='Frq', y_type='Amp', Nzp=None, flag_return='d'):
             矩形窗 : np.ones —— 缺省/默认值
             三角窗 : np.bartlett
             其他窗函数 : np.hanning, np.hamming, np.kaiser, np.blackman
-        `flag_return` : 返回data和fig的标志
+        `result` : 返回data和fig的标志
             'd'    : 只返回data —— 缺省/默认值
             'f1'   : 只返回fig(只有振幅图)
             'f2'   : 只返回fig(振幅图和相位图)
             'd+f1' : 返回data+fig(只有振幅图)
             'd+f2' : 返回data+fig(振幅图和相位图)
+        `holdon` : 同Matlab的hold on
+            True  : 若有图窗没使用plt.show(),则继续在之上绘图
+            False : 新建图窗 —— 缺省/默认值
 
         Output
         ------
@@ -91,37 +94,19 @@ def myFFT(series, dt, x_type='Frq', y_type='Amp', Nzp=None, flag_return='d'):
         #     y[1] = y[1] / 2  #
 
     # 绘图代码
-    if 'f' in flag_return:
+    if 'f' in result:
         # 根据序列实/复性获取index
         idx = [True]*Ns if flag_iscomplex else (x >= 0)
-        if   'f1' in flag_return:
-            plt.plot(x[idx], y[idx],  linewidth=0.75)
-            plt.grid(linestyle='-.', linewidth=0.5)
-        elif 'f2' in flag_return:
-            plt.rcParams['font.sans-serif'] = ['SimHei']
-            plt.rcParams['axes.unicode_minus'] = False
-            plt.subplot(211)
-            plt.plot(x[idx], y[idx].real, linewidth=0.75, label='振幅')
-            plt.legend(loc='best', frameon=False)
-            plt.grid(linestyle='-.', linewidth=0.5)
-            plt.subplot(212)
+        if   'f1' in result:
+            fig.plot(x[idx], y[idx],  linewidth=0.75, holdon=holdon)
+        elif 'f2' in result:
             angle = np.arctan2(F.imag, F.real)  # 相位角 in the range [-pi, pi]
-            plt.plot(x[idx], angle[idx],  linewidth=0.75, label='相位')
-            plt.legend(loc='best', frameon=False)
-            plt.grid(linestyle='-.', linewidth=0.5)
+            fig.plt.subplot(211)                # 振幅图
+            fig.plot(x[idx], y[idx],      linewidth=0.75, label='振幅')
+            fig.plt.subplot(212)                # 相位图
+            fig.plot(x[idx], angle[idx],  linewidth=0.75, label='相位')
         else:
             raise ValueError('[ERROR] - wrong value of `flag_return`')
-        plt.show()
     
     # 返回‘完整’数据 (对于实序列,图像只展示了一半)
-    if 'd' in flag_return: return x, y
-
-
-## 绘图工具
-def myPlot(x, y, linewidth=0.5, label=None, xlabel=None, ylabel=None):
-    # 解决标签无法显示中文的问题:https://blog.csdn.net/weixin_43343803/article/details/90551321
-    plt.rcParams['font.sans-serif'] = ['SimHei']
-    plt.rcParams['axes.unicode_minus'] = False
-    # 绘图
-    plt.plot(x, y, linewidth=linewidth, label=label)
-    plt.legend()
+    if 'd' in result: return x, y

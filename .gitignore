@@ -3,3 +3,7 @@ __pycache__
 .ipynb_checkpoints.
 # 忽略文件
 *.docx
+# docx的临时文件
+*.tmp
+# python保存的图片
+tmp.svg
